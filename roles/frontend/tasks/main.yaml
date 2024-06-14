@@ -1,0 +1,27 @@
+- name: install nginx
+  ansible.builtin.dnf:
+    name: nginx
+    state: installed
+
+- name: start and enable nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: using common role for creating app folder
+  ansible.builtin.import_role:
+    name: common
+    tasks_from: common_code
+
+- name: copy expense.conf (backend conf) to frontend server
+  ansible.builtin.template:
+    src: expense.conf.j2 
+    dest: /etc/nginx/default.d/expense.conf 
+  notify:
+  - restart nginx
+
+# - name: restart nginx #restart service only, when config changes, so moving this code to handlers
+#   ansible.builtin.service:
+#     name: nginx
+#     state: restarted

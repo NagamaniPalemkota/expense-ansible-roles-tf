@@ -1,0 +1,3 @@
+BACKEND_API_URL:  backend.muvva.online
+component: frontend
+APP_LOCATION: /usr/share/nginx/html

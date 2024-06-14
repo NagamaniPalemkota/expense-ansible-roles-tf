@@ -1,0 +1,69 @@
+- name: disabling nodejs 
+  ansible.builtin.command: " dnf module disable nodejs -y"
+
+- name: enabling nodejs:20 version
+  ansible.builtin.command: " dnf module enable nodejs:20 -y"
+
+- name: installing nodejs
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: installed
+  loop:
+  - nodejs
+  - mysql
+
+- name: adding expense user
+  ansible.builtin.user:
+    name: expense
+
+- name: using common role for creating app folder
+  tags:
+  - deployment  #deployment related
+  ansible.builtin.import_role:
+    name: common
+    tasks_from: common_code
+
+- name: install dependencies
+  tags:
+  - deployment #deployment related
+  ansible.builtin.command: npm install
+  args:
+    chdir:  /app #we're asking to change to /app and then, execute this install cmd using args option
+
+- name: copy the backend service file into the node server
+  ansible.builtin.template:
+    src: backend.service.j2
+    dest: /etc/systemd/system/backend.service
+  notify:
+  - daemon reloading the service
+
+- name: install mysql-python dependencies
+  ansible.builtin.pip:
+    name:
+    - PyMySQL   #needed for python based ansible to connect to mysql on server
+    - cryptography #need to be installed to enter pwd in command line
+    executable: pip3.9 #since ansible python version is 3.9, we have to use module 3.9
+    state: latest
+
+- name: import data into mysql
+  community.mysql.mysql_db:
+    login_user: "{{ login_user }}"
+    login_password: "{{ login_password }}"
+    login_host: "{{ login_hostname }}"
+    target: /app/schema/backend.sql
+    state: import
+    name: all #name should be all to mention it to dump all data when dump stateis mentioned
+
+
+- name: start and enable backend service
+  ansible.builtin.service:
+    name: backend
+    state: started
+    enabled: yes
+
+- name: restart backend service
+  tags:
+  - deployment
+  ansible.builtin.service:
+    name: backend
+    state: restarted
