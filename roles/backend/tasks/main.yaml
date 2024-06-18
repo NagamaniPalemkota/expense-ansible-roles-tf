@@ -37,6 +37,12 @@
   notify:
   - daemon reloading the service
 
+  
+- name: enable backend service
+  ansible.builtin.service:
+    name: backend
+    enabled: yes
+
 - name: install mysql-python dependencies
   ansible.builtin.pip:
     name:
@@ -55,16 +61,9 @@
     name: all #name should be all to mention it to dump all data when dump stateis mentioned
 
 
-- name: start and enable backend service
-  ansible.builtin.service:
-    name: backend
-    state: started
-    enabled: yes
+# - name: start and enable backend service
+#   ansible.builtin.service:
+#     name: backend
+#     state: started
+#     enabled: yes
 
-- name: restart backend service
-  tags:
-  - deployment
-  ansible.builtin.service:
-    name: backend
-    state: restarted
-    enabled: yes
