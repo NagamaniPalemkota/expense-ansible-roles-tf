@@ -23,12 +23,12 @@
     name: common
     tasks_from: common_code
 
-- name: install dependencies
-  tags:
-  - deployment #deployment related
-  ansible.builtin.command: npm install
-  args:
-    chdir:  /app #we're asking to change to /app and then, execute this install cmd using args option
+# - name: install dependencies
+#   tags:
+#   - deployment #deployment related
+#   ansible.builtin.command: npm install
+#   args:
+#     chdir:  /app #we're asking to change to /app and then, execute this install cmd using args option
 
 - name: copy the backend service file into the node server
   ansible.builtin.template:
